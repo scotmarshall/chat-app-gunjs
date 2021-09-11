@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <h1>Chat app using GunJS</h1>
+    
+        <form id="sign">
+          <input id="alias" placeholder="username">
+          <input id="pass" type="password" placeholder="passphrase">
+          <input id="in" type="submit" value="sign in">
+          <input id="up" type="button" value="sign up">
+        </form>
+    
+        <ul></ul>
+    
+        <form id="said">
+            <input id="say">
+            <input id="speak" type="submit" value="speak">
+        </form>
+    
+        <script src="https://cdn.jsdelivr.net/npm/gun/examples/jquery.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+        <!-- script src="https://cdn.jsdelivr.net/npm/gun/lib/webrtc.js"></script -->
+        <script>
+        var gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+        var chat = gun.get('scotmarshall@github').get('chat-app-gunjs');
+        var rocky1 = chat.get('rocky1').put({name: 'rocky1', age: 22});
+        //var rocky12 = chat.get('rocky12').put({name: 'rocky12', age: 24});
+
+        //var bob = gun.get('bob').put({name: 'bob', age: 24});
+        //var carl = gun.get('carl').put({name: 'carl', age: 16});
+        //var dave = gun.get('dave').put({name: 'dave', age: 42});
+        //.put({name: 'alice', age: 22});
+
+        //chat.get('rocky11').on(function(node){
+        //   console.log('Subscribed to rocky11!', node.name);
+        //});
+
+        //chat.get('rocky12').once(function(node){
+        //    console.log('rocky12!', node.name);
+        //});
+
+        var champions = chat.get('champions');
+        // champions.set(chat.get('rocky1'));
+        // champions.set(chat.get('rocky2'));
+
+        champions.map().once(function(champion){
+            console.log("The champion is", champion.name);
+        });
+
+        var user = chat.user();
+    
+        $('#up').on('click', function(e){
+          user.create($('#alias').val(), $('#pass').val());
+        });
+    
+        $('#sign').on('submit', function(e){
+          e.preventDefault();
+          user.auth($('#alias').val(), $('#pass').val());
+        });
+    
+        $('#said').on('submit', function(e){
+          e.preventDefault();
+          if(!user.is){ return }
+          user.get('said').set($('#say').val());
+          $('#say').val("");
+        });
+    
+        function UI(say, id){
+          var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul');
+          $(li).text(say);
+        };
+    
+        gun.on('auth', function(){
+          $('#sign').hide();
+          user.get('said').map().once(UI);
+
+
+
+          // gun.get('nader').get('address').once(data => {
+          //   console.log('data changed: ', data);
+          // });
+        });
+        </script>
+    </body>
+</html>
